@@ -1,0 +1,994 @@
+SELECT to_char(sysdate, 'YYYY.MM.DD. HH24:MI:SS') FROM dual;
+SELECT to_char(sysdate, 'DS TS') FROM dual;
+
+-- mi az aktualis honap? (a substr fuggvenyt lasd lejjebb)
+SELECT substr(to_char(sysdate, 'DS TS'), 6, 2) FROM dual;   -- nem jo megoldas
+SELECT to_char(sysdate, 'MM') FROM dual;
+
+SELECT to_char(round(sysdate), 'DS TS') FROM dual;
+SELECT to_char(trunc(sysdate), 'DS TS') FROM dual;
+SELECT to_char(round(sysdate, 'MM'), 'DS TS') FROM dual;
+SELECT to_char(trunc(sysdate, 'MM'), 'DS TS') FROM dual;
+SELECT to_char(trunc(sysdate, 'YYYY'), 'DS TS') FROM dual;
+
+SELECT to_char(sysdate + 3.5, 'DS TS') FROM dual;   -- tort napokat is hozza lehet adni
+SELECT to_char(sysdate - 3, 'DS TS') FROM dual;
+SELECT to_char(round(sysdate - 7, 'MM'), 'DS TS') FROM dual;
+SELECT to_char(sysdate - 1 / 24, 'DS TS') FROM dual;
+
+SELECT to_char(add_months(sysdate, 4), 'DS TS') FROM dual;   -- csak egesz honapokat lehet hozzaadni
+SELECT to_char(add_months(sysdate, -4), 'DS TS') FROM dual;
+
+-- konverzio sztringbol datumra
+SELECT to_date('2021.12.31', 'YYYY.MM.DD') FROM dual;
+SELECT to_char(to_date('2021.12.31', 'YYYY.MM.DD'), 'DS TS') asd FROM dual;
+SELECT to_char(add_months(to_date('2019.12.31', 'YYYY.MM.DD'), 2), 'DS TS') FROM dual;
+SELECT to_char(to_date('2021', 'YYYY'), 'DS TS') FROM dual;
+SELECT to_char(to_date('05', 'MM'), 'DS TS') FROM dual;
+
+-- ket datum kozott eltelt idotartam
+SELECT sysdate - to_date('2022.01.01', 'YYYY.MM.DD') FROM dual;   -- az iden eltelt napok szama
+SELECT 100 * (sysdate - trunc(sysdate)) FROM dual;   -- a mai napbol eltelt ido %-ban
+SELECT months_between(sysdate, to_date('2022.01.01', 'YYYY.MM.DD')) FROM dual;
+SELECT months_between(sysdate, to_date('1975.11.11', 'YYYY.MM.DD')) FROM dual;   -- eletkorom honapokban
+SELECT months_between(sysdate, to_date('1975.11.11', 'YYYY.MM.DD')) / 12 FROM dual;   -- eletkorom evekben
+SELECT (sysdate - to_date('1975.11.11', 'YYYY.MM.DD')) / 365.28 FROM dual;   -- nem pontos
+
+-- szamokkal vegzett muveletek
+SELECT round(83652.6322) FROM dual;
+SELECT trunc(83652.6322) FROM dual;
+SELECT round(-83652.6322) FROM dual;
+SELECT trunc(-83652.6322) FROM dual;
+SELECT floor(-83652.6322) FROM dual;
+SELECT ceil(-83652.6322) FROM dual;
+
+SELECT round(83652.6322, 2) FROM dual;
+SELECT round(83652.6722, 1) FROM dual;
+SELECT round(83652.6722, 0) FROM dual;   -- vagy: round(83652.6722)
+SELECT round(83652.6722, -1) FROM dual;
+SELECT round(83652.6722, -2) FROM dual;
+SELECT round(83652.6722, -3) FROM dual;
+SELECT trunc(83652.6722, -3) FROM dual;
+
+-- egy datum/ido egyes reszei sztringkent
+SELECT to_char(sysdate, 'MM') FROM dual;
+SELECT to_char(sysdate, 'YYYY') FROM dual;
+SELECT to_char(sysdate, 'MI') FROM dual;
+-- ugyanezek szamkent megadva
+SELECT extract(month from sysdate) FROM dual;
+SELECT extract(year from sysdate) FROM dual;
+--SELECT extract(minute from sysdate) FROM dual;   -- ez nem mukodik
+SELECT extract(minute from systimestamp) FROM dual;
+SELECT to_number(to_char(sysdate, 'MI')) FROM dual;   -- ez is ugyanazt adja, explicit konverzioval
+SELECT to_char(sysdate, 'MI') + 5 FROM dual;   -- automatikus konverzio a + operator hatasara
+
+-- az olvasoink teljes neve
+SELECT vezeteknev, keresztnev FROM KONYVTAR.tag;
+SELECT vezeteknev || ' ' || keresztnev FROM KONYVTAR.tag;
+SELECT vezeteknev || ' ' || keresztnev nev FROM KONYVTAR.tag;
+SELECT vezeteknev || ' ' || keresztnev "Az olvasó neve" FROM KONYVTAR.tag;
+-- a sztring literalokat aposztrofok ('xxx') koze kell irni
+-- a specialis karaktereket tartalmazo azonositokat idezojelek ("xxx") koze kell irni
+
+-- a concat fuggveny is konkatenaciot hajt vegre
+SELECT concat(concat(vezeteknev, ' '), keresztnev) nev FROM KONYVTAR.tag;
+
+SELECT '*' || ltrim('     alma         ') || '*' FROM dual;
+SELECT '*' || rtrim('     alma         ') || '*' FROM dual;
+SELECT '*' || trim('     alma         ') || '*' FROM dual;
+SELECT '*' || trim(leading ' ' from '     alma         ') || '*' FROM dual;
+SELECT '*' || trim(trailing ' ' from '     alma         ') || '*' FROM dual;
+SELECT '*' || trim(both ' ' from '     alma         ') || '*' FROM dual;
+SELECT '*' || trim('a' from 'alamizsna') || '*' FROM dual;   -- both az alapertelmezes
+SELECT kiado, trim(trailing '.' from kiado) FROM KONYVTAR.konyv;
+
+SELECT replace(vezeteknev || ' ' || keresztnev, ' ', '*') "az olvasó neve" FROM KONYVTAR.tag;
+SELECT replace(vezeteknev || ' ' || keresztnev, 'a', '') "az olvasó neve" FROM KONYVTAR.tag;
+SELECT upper(vezeteknev || ' ' || keresztnev) "az olvasó neve" FROM KONYVTAR.tag;
+SELECT lower(vezeteknev || ' ' || keresztnev) "az olvasó neve" FROM KONYVTAR.tag;
+SELECT initcap(vezeteknev || ' ' || keresztnev) "az olvasó neve" FROM KONYVTAR.tag;
+SELECT initcap('zSiRos b. oDOn') "az olvasó neve" FROM dual;
+
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    substr(vezeteknev || ' ' || keresztnev, 4, 3)
+    FROM KONYVTAR.tag;
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    substr(vezeteknev || ' ' || keresztnev, -4, 3)
+    FROM KONYVTAR.tag;
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    substr(vezeteknev || ' ' || keresztnev, 4)
+    FROM KONYVTAR.tag;
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    substr(vezeteknev || ' ' || keresztnev, -4)
+    FROM KONYVTAR.tag;
+SELECT substr(to_char(szuletesi_datum, 'YYYY.MM.DD'), 6, 2) szuletesi_honap FROM KONYVTAR.tag;
+SELECT to_char(szuletesi_datum, 'MM') szuletesi_honap FROM KONYVTAR.tag;
+-- az alabbi modszer nem helyes az alapertelmezett konverzio miatt
+SELECT substr(szuletesi_datum, 6, 2) szuletesi_honap FROM KONYVTAR.tag;
+
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    length(vezeteknev || ' ' || keresztnev) "a név hossza"
+    FROM KONYVTAR.tag;
+
+---------- Bonyolultabb SELECT-ek ----------
+
+-- Rendezes
+
+-- az olvasok neve, szuletesi ideje, eletkora (evekben merve, kerekitve), a beiratkozasi datuma
+-- a kerekitett eletkor szerint novekvoen rendezve
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    to_char(szuletesi_datum, 'YYYY.MM.DD'),
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor,
+    to_char(beiratkozasi_datum, 'YYYY.MM.DD')
+    FROM KONYVTAR.tag
+    ORDER BY eletkor;   -- ASC kulcsszo is novekevo rendezest ad
+    
+    
+----------------------------------------------------------------------------------------------------    
+    
+---------- Bonyolultabb SELECT-ek ----------
+
+-- Rendezes
+
+-- az olvasok neve, szuletesi ideje, eletkora (evekben merve, kerekitve), a beiratkozasi datuma
+-- a kerekitett eletkor szerint novekvoen rendezve
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    szuletesi_datum,
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor,
+    beiratkozasi_datum
+    FROM KONYVTAR.tag
+    ORDER BY eletkor;   -- ASC kulcsszo is novekevo rendezest ad
+
+-- csokkeno rendezes
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    szuletesi_datum,
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor,
+    beiratkozasi_datum
+    FROM KONYVTAR.tag
+    ORDER BY eletkor DESC;
+
+-- tobb szempont szerinti rendezes, illetve nem lathato oszlop szerinti rendezes
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    szuletesi_datum,
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor,
+    beiratkozasi_datum
+    FROM KONYVTAR.tag
+    ORDER BY nem, keresztnev DESC;   -- nem szerint novekvo, azon belul keresztnev szerint csokkeno
+
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    szuletesi_datum,
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor,
+    beiratkozasi_datum
+    FROM KONYVTAR.tag
+    ORDER BY substr("az olvasó neve", 2, 1), keresztnev DESC;
+
+-- a kifejezesek helyen allhat egy oszlopsorszam is
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    szuletesi_datum,
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor,
+    beiratkozasi_datum
+    FROM KONYVTAR.tag
+    ORDER BY 3, 1 DESC;
+-- hatranyai:
+-- 1. nem lehet az eredmenyben nem szereplo oszlopokra hivatkozni
+-- 2. nem lehet kifejezest (pl. fuggvenyhivast) megadni
+-- 3. vigyazni kell az oszlopok sorrendjere, ha kesobb valtozik a SELECT
+-- 4. ez kevesbe olvashato, nem latszanak a rendezesi szempontok
+
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    length(vezeteknev || ' ' || keresztnev) hossz,   -- ide nem irhatjuk az "az olvasó neve" azonositot
+    szuletesi_datum,
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor,
+    beiratkozasi_datum
+    FROM KONYVTAR.tag
+    ORDER BY substr("az olvasó neve", 2, 1), keresztnev DESC;
+
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    szuletesi_datum,
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor,
+    beiratkozasi_datum
+    FROM KONYVTAR.tag
+    ORDER BY 3 DESC, extract(month from beiratkozasi_datum) ASC;   -- kombinalt megadas
+
+-- Szures
+
+-- az 'A' betuvel kezdodo nevu olvasok neve es kerekitett eletkora, a kerekitett eletkor szerint csokkeno sorrendben
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor
+    FROM KONYVTAR.tag
+    WHERE substr(vezeteknev || ' ' || keresztnev, 1, 1) = 'A'
+    ORDER BY eletkor DESC;
+
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor
+    FROM KONYVTAR.tag
+    WHERE vezeteknev || ' ' || keresztnev LIKE 'A%'   -- ketfele joker karakter: % es _
+    ORDER BY eletkor DESC;
+
+-- a nev 6. karaktere 'a' betu
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor
+    FROM KONYVTAR.tag
+    WHERE vezeteknev || ' ' || keresztnev LIKE '_____a%'
+    ORDER BY eletkor DESC;
+
+-- a nev 6. karaktere 'a' vagy 'A' betu
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor
+    FROM KONYVTAR.tag
+    WHERE vezeteknev || ' ' || keresztnev LIKE '_____a%'
+        OR vezeteknev || ' ' || keresztnev LIKE '_____A%'
+    ORDER BY eletkor DESC;
+
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor
+    FROM KONYVTAR.tag
+    WHERE lower(vezeteknev || ' ' || keresztnev) LIKE '_____a%'
+    ORDER BY eletkor DESC;
+
+SELECT 'igen' FROM dual WHERE 'alma_szilva' LIKE '%_%';
+SELECT 'igen' FROM dual WHERE 'alma*szilva' LIKE '%_%';
+SELECT 'igen' FROM dual WHERE 'alma_szilva' LIKE '%\_%' ESCAPE '\';
+SELECT 'igen' FROM dual WHERE 'alma*szilva' LIKE '%\_%' ESCAPE '\';
+
+-- a nev 'a' vagy 'A' beture vegzodik
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor
+    FROM KONYVTAR.tag
+    WHERE lower(vezeteknev || ' ' || keresztnev) LIKE '%a'
+    ORDER BY eletkor DESC;
+
+-- a nev 'a' vagy 'A' betuvel kezdodik es vegzodik egyszerre
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor
+    FROM KONYVTAR.tag
+    WHERE lower(vezeteknev || ' ' || keresztnev) LIKE 'a%'
+        AND lower(vezeteknev || ' ' || keresztnev) LIKE '%a'
+    ORDER BY eletkor DESC;
+
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor
+    FROM KONYVTAR.tag
+    WHERE lower(vezeteknev || ' ' || keresztnev) LIKE 'a%a'   -- ez csak az extra szokoz miatt fogadhato el
+    ORDER BY eletkor DESC;
+
+-- a nev 'a' vagy 'A' betuvel kezdodik vagy vegzodik
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor
+    FROM KONYVTAR.tag
+    WHERE lower(vezeteknev || ' ' || keresztnev) LIKE 'a%'
+        OR lower(vezeteknev || ' ' || keresztnev) LIKE '%a'
+    ORDER BY eletkor DESC;
+
+-- a nev nem tartalmaz 'a' vagy 'A' betut
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor
+    FROM KONYVTAR.tag
+    WHERE NOT lower(vezeteknev || ' ' || keresztnev) LIKE '%a%'
+    ORDER BY eletkor DESC;
+
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor
+    FROM KONYVTAR.tag
+    WHERE lower(vezeteknev || ' ' || keresztnev) NOT LIKE '%a%'
+    ORDER BY eletkor DESC;
+
+-- a nev legalabb ket 'a' vagy 'A' betut tartalmaz
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor
+    FROM KONYVTAR.tag
+    WHERE lower(vezeteknev || ' ' || keresztnev) LIKE '%a%a%'
+    ORDER BY eletkor DESC;
+
+-- a nev pontosan ket 'a' vagy 'A' betut tartalmaz
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor
+    FROM KONYVTAR.tag
+    WHERE lower(vezeteknev || ' ' || keresztnev) LIKE '%a%a%'
+        AND lower(vezeteknev || ' ' || keresztnev) NOT LIKE '%a%a%a%'
+    ORDER BY eletkor DESC;
+
+SELECT
+    vezeteknev || ' ' || keresztnev "az olvasó neve",
+    round(months_between(sysdate, szuletesi_datum) / 12) eletkor
+    FROM KONYVTAR.tag
+    WHERE regexp_count(lower(vezeteknev || ' ' || keresztnev), 'a') = 2
+    ORDER BY eletkor DESC;
+
+-- a 6 karakterbol allo temanevek
+SELECT tema
+    FROM KONYVTAR.konyv
+    WHERE tema LIKE '______';
+
+SELECT tema
+    FROM KONYVTAR.konyv
+    WHERE length(tema) = 6;
+
+-- egy temanevet csak egyszer
+SELECT DISTINCT tema
+    FROM KONYVTAR.konyv
+    WHERE length(tema) = 6;
+
+-- temanevek es szazasra kerekitett oldalszamok, rendezve
+SELECT DISTINCT tema, round(oldalszam, -2)
+    FROM KONYVTAR.konyv
+    ORDER BY 1, 2;
+
+-- az alabbi ket feladatszoveg ekvivalens egymassal
+-- a sci-fi vagy krimi temaju konyvek cime es temaja
+-- a sci-fi es krimi temaju konyvek cime es temaja
+SELECT cim, tema
+    FROM KONYVTAR.konyv
+    WHERE tema = 'sci-fi' OR tema = 'krimi';
+
+SELECT cim, tema
+    FROM KONYVTAR.konyv
+    WHERE tema IN ('sci-fi', 'krimi');
+
+-- azon konyvek cime es temaja, amelyek nem sci-fi es nem is krimi temajuak
+SELECT cim, tema
+    FROM KONYVTAR.konyv
+    WHERE NOT (tema = 'sci-fi' OR tema = 'krimi');   -- a zarojel szukseges, mert a NOT erosebb, mint az OR
+
+SELECT cim, tema
+    FROM KONYVTAR.konyv
+    WHERE tema <> 'sci-fi' AND tema != 'krimi';   -- nem egyenlo operator meg a ^= is
+
+SELECT cim, tema
+    FROM KONYVTAR.konyv
+    WHERE tema NOT IN ('sci-fi', 'krimi');   -- vagy: WHERE NOT tema IN ('sci-fi', 'krimi')
+
+-- az alabbiak nem irnak ki semmit, mert a NULL ertekekkel vegzett legtobb muvelet eredmenye NULL
+SELECT 'igen' FROM dual WHERE NULL = NULL;
+SELECT 'igen' FROM dual WHERE NULL <> NULL;
+SELECT 'igen' FROM dual WHERE 'krumpli' <> NULL;
+
+-- azon konyvek cime es temaja, amelyek nem sci-fi es nem is krimi temajuak, beleertve a nem ismert temakat is
+SELECT cim, tema
+    FROM KONYVTAR.konyv
+    WHERE tema NOT IN ('sci-fi', 'krimi')
+        OR tema IS NULL;   -- tema = NULL nem jo!
+
+-- azon konyvek cime es temaja, amelyeknek nem ismert a temaja
+SELECT cim, tema
+    FROM KONYVTAR.konyv
+    WHERE tema IS NULL;
+
+-- azon konyvek cime es temaja, amelyeknek ismert a temaja
+SELECT cim, tema
+    FROM KONYVTAR.konyv
+    WHERE tema IS NOT NULL;   -- vagy: WHERE NOT tema IS NULL
+    
+    
+    
+-------------------------------------------------------------------------------------------
+    
+    
+-- azon konyvek cime, temaja, oldalszama, ara es a kiadasanak datuma, amelyek
+-- (1) 1990 es 2000 kozott kerultek kiadasra, vagy
+-- (2) az aruk 1000 es 3000 koze esik, vagy
+-- (3) sci-fi temajuak es rovidebbek 20 oldalnal;
+-- az eredmenyt tema szerint csokkeno, azon belul oldalszam szerint novekvo sorrendben szeretnenk latni
+SELECT cim, tema, oldalszam, ar, kiadas_datuma
+    FROM KONYVTAR.konyv
+    WHERE kiadas_datuma >= to_date('1990', 'yyyy')   -- ez nem jo megoldas, nem eleg az evet megadni!
+        AND kiadas_datuma <= to_date('2000', 'yyyy')   -- a zarojelezes nem szukseges, mert az AND erosebb az OR-nal
+        OR ar >= 1000 AND ar <= 3000
+        OR tema = 'sci-fi' AND oldalszam < 20
+    ORDER BY tema DESC, oldalszam;
+
+-- SELECT to_char(to_date('1990', 'yyyy'), 'ds ts') FROM dual;
+
+-- a nem ismert temaju konyvek keruljenek a lista vegere
+SELECT cim, tema, oldalszam, ar, to_char(kiadas_datuma, 'ds')
+    FROM KONYVTAR.konyv
+    WHERE kiadas_datuma >= to_date('1990.01.01', 'yyyy.mm.dd')
+        AND kiadas_datuma <= to_date('2000.12.31', 'yyyy.mm.dd')   -- ez meg mindig nem jo, ha az ido is szamit
+        OR ar >= 1000 AND ar <= 3000
+        OR tema = 'sci-fi' AND oldalszam < 20
+    ORDER BY tema DESC NULLS LAST, oldalszam;   -- NULLS FIRST a NULL ertekeket a lista elejere rakja
+
+-- SELECT to_char(to_date('2000.12.31', 'yyyy.mm.dd'), 'ds ts') FROM dual;
+-- SELECT to_char(kiadas_datuma, 'ds ts') FROM KONYVTAR.konyv;
+
+SELECT cim, tema, oldalszam, ar, to_char(kiadas_datuma, 'ds')
+    FROM KONYVTAR.konyv
+    WHERE kiadas_datuma >= to_date('1990.01.01', 'yyyy.mm.dd')
+        AND kiadas_datuma < to_date('2001.01.01', 'yyyy.mm.dd')
+        OR ar >= 1000 AND ar <= 3000
+        OR tema = 'sci-fi' AND oldalszam < 20
+    ORDER BY tema DESC NULLS LAST, oldalszam;
+
+SELECT cim, tema, oldalszam, ar, to_char(kiadas_datuma, 'yyyy.mm.dd')
+    FROM KONYVTAR.konyv
+    WHERE extract(year from kiadas_datuma) >= 1990
+        AND extract(year from kiadas_datuma) <= 2000
+        OR ar >= 1000 AND ar <= 3000
+        OR tema = 'sci-fi' AND oldalszam < 20
+    ORDER BY tema DESC NULLS LAST, oldalszam;
+
+SELECT cim, tema, oldalszam, ar, to_char(kiadas_datuma, 'ds')
+    FROM KONYVTAR.konyv
+    WHERE extract(year from kiadas_datuma) BETWEEN 1990 AND 2000
+        OR ar BETWEEN 1000 AND 3000
+        OR tema = 'sci-fi' AND oldalszam < 20
+    ORDER BY tema DESC NULLS LAST, oldalszam;
+
+-- azon konyvek cime es ara, amelyek ara nem 1000 es 3000 koze esik
+SELECT cim, ar
+    FROM KONYVTAR.konyv
+    WHERE ar NOT BETWEEN 1000 AND 3000   -- vagy: ar < 1000 OR ar > 3000, vagy: NOT ar BETWEEN 1000 AND 3000
+    ORDER BY ar;
+
+---------- Csoportfuggvenyek ----------
+
+-- A csoportfuggvenyek sorok egy csoportjara adnak pontosan egy eredmenyt (nem minden egyes sorra egyet-egyet).
+
+-- hany konyv szerepel az adatbazisunkban?
+SELECT COUNT(*)   -- a * parameter hatasara a sorokat szamoljuk meg
+    FROM KONYVTAR.konyv;
+
+-- hany 3000-nel olcsobb konyv szerepel az adatbazisunkban?
+SELECT COUNT(*)
+    FROM KONYVTAR.konyv
+    WHERE ar < 3000;
+
+-- hany olyan konyvunk van, amelyek nem ismert temajuak?
+SELECT COUNT(*)
+    FROM KONYVTAR.konyv
+    WHERE tema IS NULL;
+
+-- hany olyan konyvunk van, amelyek ismert temajuak?
+SELECT COUNT(*)
+    FROM KONYVTAR.konyv
+    WHERE tema IS NOT NULL;
+
+SELECT COUNT(tema)   -- csak a nem NULL ertekeket szamolja meg
+    FROM KONYVTAR.konyv;
+
+SELECT COUNT(length(tema))   -- a length fuggveny is NULL-t ad, ha a parametere NULL
+    FROM KONYVTAR.konyv;
+
+SELECT COUNT(1)   -- ez ekvivalens a COUNT(*)-gal
+    FROM KONYVTAR.konyv;
+
+-- hany kulonbozo (de ismert) temaju konyv szerepel az adatbazisban?
+SELECT COUNT(DISTINCT tema)
+    FROM KONYVTAR.konyv;
+
+-- melyek ezek?
+SELECT DISTINCT tema
+    FROM KONYVTAR.konyv;
+
+-- a fenti kerdest alkerdessel is meg tudjuk valaszolni (az alkerdeseket lasd kesobb)
+SELECT COUNT(*)
+    FROM (SELECT DISTINCT tema
+              FROM KONYVTAR.konyv
+              WHERE tema IS NOT NULL);
+
+-- tovabbi csoportfuggvenyek
+SELECT
+    COUNT(ar),   -- nem NULL arak darabszama, barmilyen tipusu adatra mukodik
+    MIN(ar),     -- nem NULL arak minimuma,   MIN es MAX csak rendezheto tipusu adatok eseten hasznalhato
+    MAX(ar),     -- nem NULL arak maximuma
+    SUM(ar),     -- nem NULL arak osszege,    SUM es AVG csak szam tipusu adatok eseten hasznalhato
+    AVG(ar)      -- nem NULL arak szamtani kozepe (atlaga)
+    FROM KONYVTAR.konyv;
+
+SELECT
+    COUNT(ar),
+    SUM(ar),
+    round(AVG(ar), 2),
+    round(SUM(ar) / COUNT(ar), 2),   -- ez megegyezik az AVG(ar)-ral
+    round(SUM(ar) / COUNT(*), 2),    -- ez a NULL erteku arakat 0-val szamitja be az atlagba
+    round(SUM(nvl(ar, 1000)) / COUNT(*), 2),   -- a nem ismert arakat 1000-nek tekintjuk
+    round(SUM(nvl(ar, (SELECT AVG(ar) FROM KONYVTAR.konyv))) / COUNT(*), 2)   -- ez igy nem befolyasolja az atlagot
+    FROM KONYVTAR.konyv;
+
+-- csak az 500 oldalnal rovidebb konyvek eseten vagyunk kivancsiak a fenti adatokra
+SELECT
+    COUNT(ar),
+    SUM(ar),
+    round(AVG(ar), 2),
+    round(SUM(ar) / COUNT(ar), 2),
+    round(SUM(ar) / COUNT(*), 2),
+    round(SUM(nvl(ar, 1000)) / COUNT(*), 2),
+    round(SUM(nvl(ar, (SELECT AVG(ar) FROM KONYVTAR.konyv))) / COUNT(*), 2)
+    FROM KONYVTAR.konyv
+    WHERE oldalszam < 500;
+
+-- az 500 oldalnal rovidebb, nem ismert aru konyvek
+SELECT *
+    FROM KONYVTAR.konyv
+    WHERE oldalszam < 500 AND ar IS NULL;
+
+-- a lexikografikusan legkisebb es legnagyobb kiadot is latni szeretnenk
+SELECT
+    COUNT(ar),
+    MIN(ar),
+    MAX(ar),
+    SUM(ar),
+    AVG(ar),
+    MIN(kiado),
+    MAX(kiado),
+    MIN(trim(kiado)),
+    MAX(trim(kiado))
+    FROM KONYVTAR.konyv;
+
+-- ha csak NULL ertekek vannak, akkor a COUNT 0-t, a tobbi fuggveny NULL-t ad
+SELECT
+    COUNT(ar),
+    MIN(ar),
+    MAX(ar),
+    SUM(ar),
+    AVG(ar)
+    FROM KONYVTAR.konyv
+    WHERE ar IS NULL;
+
+-- akkor is ez az eredmeny, ha ures tablaval dolgozunk
+SELECT
+    COUNT(ar),
+    MIN(ar),
+    MAX(ar),
+    SUM(ar),
+    AVG(ar)
+    FROM KONYVTAR.konyv
+    WHERE ar > 20000;
+
+---------- Csoportositas ----------
+
+-- a krimi temaju konyvek szama es (2 tizedesjegyre kerekitett) atlagara
+SELECT
+    COUNT(*),
+    round(AVG(ar), 2)
+    FROM KONYVTAR.konyv
+    WHERE tema = 'krimi';
+
+-- temankent a konyvek szama es (2 tizedesjegyre kerekitett) atlagara
+SELECT
+    COUNT(*),
+    round(AVG(ar), 2)
+    FROM KONYVTAR.konyv
+    GROUP BY tema;
+
+-- a fenti megoldas nem jo, mert nem lehet beazonositani, hogy az egyes sorok mely temakhoz tartoznak
+SELECT
+    tema,
+    COUNT(*),
+    round(AVG(ar), 2)
+    FROM KONYVTAR.konyv
+    GROUP BY tema;
+
+-- csak az 500 oldalnal rovidebb konyvek eseten kellenek a fenti adatok, rendezve atlagar szerint csokkeno sorrendben
+SELECT
+    tema,                   -- 4. lepes
+    COUNT(*),
+    round(AVG(ar), 2)
+    FROM KONYVTAR.konyv     -- 1. lepes
+    WHERE oldalszam < 500   -- 2. lepes
+    GROUP BY tema           -- 3. lepes
+    ORDER BY 3 DESC;        -- 5. lepes
+
+-- kiadonkent es temankent a konyvek darabszama es atlagos hossza, az atlaghossz szerint csokkenoen rendezve
+SELECT kiado, tema, COUNT(*), AVG(oldalszam) atlaghossz
+    FROM KONYVTAR.konyv
+    GROUP BY kiado, tema
+    ORDER BY atlaghossz DESC NULLS LAST;
+
+-- az alabbi megoldas nem ekvivalens a fentivel (es nem is elfogadhato a fenti feladatra)
+-- (pl. 'AB' kiadot es 'CD' temat, illetve 'ABC' kiadot es 'D' temat tartalmazo sorok egy csoportba kerulnek)
+SELECT kiado || tema, COUNT(*), AVG(oldalszam) atlaghossz
+    FROM KONYVTAR.konyv
+    GROUP BY kiado || tema   -- barmilyen kifejezes lehet a csoportositasi szempont
+    ORDER BY atlaghossz DESC;
+
+-- iranyitoszamonkent hany olvasonk van, rendezzuk darabszam szerint csokkenobe
+SELECT substr(cim, 1, 4) ir_szam, COUNT(*)
+    FROM KONYVTAR.tag
+    GROUP BY substr(cim, 1, 4)   -- ir_szam oszlopnev itt meg nem letezik
+    ORDER BY COUNT(*) DESC;
+
+-- telepulesnevenkent hany olvasonk van, rendezzuk darabszam szerint csokkenobe
+SELECT substr(cim, 6, instr(cim, ',') - 6), COUNT(*)
+    FROM KONYVTAR.tag
+    GROUP BY substr(cim, 6, instr(cim, ',') - 6)
+    ORDER BY COUNT(*) DESC;
+
+SELECT substr(regexp_substr(cim, ' .*,'), 2, length(regexp_substr(cim, ' .*,')) - 2), COUNT(*)
+    FROM KONYVTAR.tag
+    GROUP BY substr(regexp_substr(cim, ' .*,'), 2, length(regexp_substr(cim, ' .*,')) - 2)
+    ORDER BY COUNT(*) DESC;
+
+SELECT trim(',' from trim(regexp_substr(cim, ' .*,'))), COUNT(*)
+    FROM KONYVTAR.tag
+    GROUP BY trim(',' from trim(regexp_substr(cim, ' .*,')))
+    ORDER BY COUNT(*) DESC;   
+    
+    
+---------------------------------------------------------------------------------------------------------
+    
+    
+-- besorolasonkent hany 50 evesnel fiatalabb noi olvasonk van
+SELECT besorolas, COUNT(*)
+    FROM KONYVTAR.tag
+    WHERE months_between(sysdate, szuletesi_datum) / 12 < 50 AND nem = 'n'
+    GROUP BY besorolas;
+    
+SELECT nem from KONYVTAR.tag;
+
+-- szuletesi evenkent hany olvasonk van, szuletesi ev szerint novekvoen rendezve
+SELECT extract(year from szuletesi_datum) ev, COUNT(*)
+    FROM KONYVTAR.tag
+    GROUP BY extract(year from szuletesi_datum)
+    ORDER BY ev;
+
+-- csak azok az evek erdekelnek, amelyekben 1-nel tobb olvaso szuletett
+SELECT extract(year from szuletesi_datum) ev, COUNT(*)
+    FROM KONYVTAR.tag
+    GROUP BY extract(year from szuletesi_datum)
+    HAVING COUNT(*) > 1
+    ORDER BY ev;
+
+-- ugyanez HAVING nelkul, beagyazott SELECT-tel
+SELECT *
+    FROM
+        (SELECT extract(year from szuletesi_datum) ev, COUNT(*) darab
+            FROM KONYVTAR.tag
+            GROUP BY extract(year from szuletesi_datum))
+    WHERE darab > 1
+    ORDER BY ev;
+
+-- szuletesi evenkent hany diak olvasonk van, szuletesi ev szerint novekvoen rendezve
+-- csak azok az evek erdekelnek, amikor 1-nel tobben szulettek
+SELECT extract(year from szuletesi_datum) ev, COUNT(*)   -- 5. lepes
+    FROM KONYVTAR.tag                                    -- 1. lepes
+    WHERE besorolas = 'diák'                             -- 2. lepes
+    GROUP BY extract(year from szuletesi_datum)          -- 3. lepes
+    HAVING COUNT(*) > 1                                  -- 4. lepes
+    ORDER BY ev;                                         -- 6. lepes
+
+-- csoportfuggvenyek egymasba agyazasa
+-- hany diak olvaso szuletett abban az evben (azokban az evekben), amikor a legtobb diak olvaso szuletett?
+-- beagyazott SELECT-tel:
+SELECT MAX(db)
+    FROM (SELECT extract(year from szuletesi_datum) ev, COUNT(*) db
+              FROM KONYVTAR.tag
+              WHERE besorolas = 'diák'
+              GROUP BY extract(year from szuletesi_datum));
+-- egyszerubben, egymasba agyazott csoportfuggvenyekkel:
+SELECT MAX(COUNT(*))
+    FROM KONYVTAR.tag
+    WHERE besorolas = 'diák'
+    GROUP BY extract(year from szuletesi_datum);
+
+-- egy olyan GROUP BY, amelyben a csoportosito kifejezesek megegyeznek a SELECT-lista kifejezeseivel,
+-- az ekvivalens egy GROUP BY nelkuli, DISTINCT-tel ellatott SELECT-tel:
+-- a kulonbozo besorolas/szuletesi evszam parosok listaja rendezve
+SELECT besorolas, extract(year from szuletesi_datum)
+    FROM KONYVTAR.tag
+    GROUP BY besorolas, extract(year from szuletesi_datum)
+    ORDER BY 1, 2;
+SELECT DISTINCT besorolas, extract(year from szuletesi_datum)
+    FROM KONYVTAR.tag
+    ORDER BY 1, 2;
+
+-- az egyes szerzok legmagasabb honorariuma; a szerzoket az azonositojukkal adjuk meg;
+-- csak azok a szerzok erdekelnek, akiknel ez a legmagasabb honorarium meghaladja az 1 milliot
+-- (vagy maskeppen: van olyan konyve, amelyert 1 millional tobbet kapott)
+SELECT szerzo_azon, MAX(honorarium)
+    FROM KONYVTAR.konyvszerzo
+    GROUP BY szerzo_azon
+    HAVING MAX(honorarium) > 1000000;
+
+-- ez is jo megoldas
+SELECT szerzo_azon, MAX(honorarium)
+    FROM KONYVTAR.konyvszerzo
+    WHERE honorarium > 1000000
+    GROUP BY szerzo_azon;
+
+---------- Osszekapcsolasok (join) ----------
+
+-- a reszletes anyagot lasd az orai anyagok kozott talalhato 6. Összekapcsolások cimu PDF-ben
+
+-- Descartes-szorzat
+SELECT * FROM KONYVTAR.konyv, KONYVTAR.konyvtari_konyv;
+
+-- hany soros ez a tabla?
+SELECT COUNT(*) FROM KONYVTAR.konyv;
+SELECT COUNT(*) FROM KONYVTAR.konyvtari_konyv;
+SELECT
+    (SELECT COUNT(*) FROM KONYVTAR.konyv)
+    * (SELECT COUNT(*) FROM KONYVTAR.konyvtari_konyv)
+    FROM dual;
+SELECT COUNT(*) FROM KONYVTAR.konyv, KONYVTAR.konyvtari_konyv;
+
+-- egyenlosegen alapulo osszekapcsolas (equijoin)
+SELECT *
+    FROM KONYVTAR.konyv, KONYVTAR.konyvtari_konyv
+    WHERE KONYVTAR.konyv.konyv_azon = KONYVTAR.konyvtari_konyv.konyv_azon;
+
+-- szures oszlopokra
+SELECT leltari_szam, cim, kiado, ar, ertek
+    FROM KONYVTAR.konyv, KONYVTAR.konyvtari_konyv
+    WHERE KONYVTAR.konyv.konyv_azon = KONYVTAR.konyvtari_konyv.konyv_azon;
+
+-- az egyik relacio osszes oszlopa kell
+SELECT KONYVTAR.konyvtari_konyv.*, cim, kiado, ar
+    FROM KONYVTAR.konyv, KONYVTAR.konyvtari_konyv
+    WHERE KONYVTAR.konyv.konyv_azon = KONYVTAR.konyvtari_konyv.konyv_azon;
+
+-- a sema neve a FROM kivetelevel elhagyhato
+SELECT konyvtari_konyv.*, cim, kiado, ar
+    FROM KONYVTAR.konyv, KONYVTAR.konyvtari_konyv
+    WHERE konyv.konyv_azon = konyvtari_konyv.konyv_azon;
+
+-- masodlagos tablaneveket is hasznalhatunk
+SELECT kk.*, cim, kiado, ar
+    FROM KONYVTAR.konyv k, KONYVTAR.konyvtari_konyv kk
+    WHERE k.konyv_azon = kk.konyv_azon;
+
+-- sorokra is szurhetunk
+SELECT kk.*, cim, kiado, ar
+    FROM KONYVTAR.konyv k, KONYVTAR.konyvtari_konyv kk
+    WHERE k.konyv_azon = kk.konyv_azon
+        AND cim LIKE 'N%';
+
+-- bevezetjuk a JOIN operatort
+SELECT kk.*, cim, kiado, ar
+    FROM KONYVTAR.konyv k JOIN KONYVTAR.konyvtari_konyv kk
+        ON k.konyv_azon = kk.konyv_azon
+    WHERE cim LIKE 'N%';
+
+-- a kovetkezo ket megoldas technikailag ekvivalens az elozovel (de kerulendok)
+SELECT kk.*, cim, kiado, ar
+    FROM KONYVTAR.konyv k JOIN KONYVTAR.konyvtari_konyv kk
+        ON k.konyv_azon = kk.konyv_azon
+            AND cim LIKE 'N%';
+SELECT kk.*, cim, kiado, ar
+    FROM KONYVTAR.konyv k JOIN KONYVTAR.konyvtari_konyv kk
+        ON cim LIKE 'N%'
+    WHERE k.konyv_azon = kk.konyv_azon;
+
+-- rovidebb alak olyan equijoin eseten, ahol az osszekapcsolasi attributumok neve megegyezik a ket tablaban
+-- ilyenkor az eredmenyben csak egyszer jelenik meg az osszekapcsolasi attributum
+SELECT *
+    FROM KONYVTAR.konyv JOIN KONYVTAR.konyvtari_konyv
+        USING (konyv_azon);
+
+-- termeszetes osszekapcsolas (natural join)
+SELECT *
+    FROM KONYVTAR.konyv NATURAL JOIN KONYVTAR.konyvtari_konyv;
+
+-- ha a ket osszekapcsolt tablaban nincsenek azonos nevu attributumok, akkor egy Descrates-szorzatot kapunk
+SELECT *
+    FROM KONYVTAR.konyv NATURAL JOIN KONYVTAR.szerzo;
+
+-- irassuk ki a "Tíz kicsi néger" cimu konyv peldanyainak leltari szamat es erteket
+SELECT leltari_szam, ertek
+    FROM KONYVTAR.konyv NATURAL JOIN KONYVTAR.konyvtari_konyv
+    WHERE cim = 'Tíz kicsi néger';
+
+-- Stephen King mennyi honorariumban reszesult az egyes konyveiert (a konyveket az azonositojukkal adjuk meg)?
+SELECT konyv_azon, honorarium
+    FROM KONYVTAR.szerzo NATURAL JOIN KONYVTAR.konyvszerzo
+    WHERE vezeteknev = 'King' AND keresztnev = 'Stephen';
+
+-- Stephen King mennyi honorariumban reszesult az egyes konyveiert (a konyveket a cimukkel adjuk meg)?
+SELECT cim, honorarium
+    FROM KONYVTAR.szerzo NATURAL JOIN KONYVTAR.konyvszerzo
+        NATURAL JOIN KONYVTAR.konyv
+    WHERE vezeteknev = 'King' AND keresztnev = 'Stephen';
+
+-- ugyanez zarojelezve (ha az operator jobb oldala van zarojelben) hibas eredmenyt ad
+SELECT cim, honorarium
+    FROM KONYVTAR.szerzo NATURAL JOIN
+        (KONYVTAR.konyvszerzo NATURAL JOIN KONYVTAR.konyv)
+    WHERE vezeteknev = 'King' AND keresztnev = 'Stephen';
+
+-- de USING-gal (vagy ON-nal vagy WHERE-rel) zarojelezve is jol mukodik
+SELECT cim, honorarium
+    FROM KONYVTAR.szerzo JOIN
+        (KONYVTAR.konyvszerzo NATURAL JOIN KONYVTAR.konyv)
+        USING (szerzo_azon)
+    WHERE vezeteknev = 'King' AND keresztnev = 'Stephen';
+
+-- ki irta a "Tíz kicsi néger" cimu konyvet?
+SELECT vezeteknev || ', ' || keresztnev nev
+    FROM KONYVTAR.szerzo NATURAL JOIN KONYVTAR.konyvszerzo
+        NATURAL JOIN KONYVTAR.konyv
+    WHERE cim = 'Tíz kicsi néger';
+
+-- adjuk meg azon diakok vezeteknevet es keresztnevet, akiknel jelenleg is van kint konyv (nincs megadva
+-- a visszahozasi datum), es adjuk meg a naluk levo konyvek cimet es a peldányok leltari szamat is
+SELECT vezeteknev, keresztnev, konyv.cim, leltari_szam
+    FROM KONYVTAR.tag JOIN KONYVTAR.kolcsonzes ON tag_azon = olvasojegyszam
+        NATURAL JOIN KONYVTAR.konyvtari_konyv
+        JOIN KONYVTAR.konyv USING (konyv_azon)
+    WHERE besorolas = 'diák' AND visszahozasi_datum IS NULL;
+
+-- ugyanez mas sorrendben mar megy ket termeszetes osszekapcsolassal is
+SELECT vezeteknev, keresztnev, konyv.cim, leltari_szam
+    FROM KONYVTAR.konyv NATURAL JOIN KONYVTAR.konyvtari_konyv
+        NATURAL JOIN KONYVTAR.kolcsonzes
+        JOIN KONYVTAR.tag ON tag_azon = olvasojegyszam
+    WHERE besorolas = 'diák' AND visszahozasi_datum IS NULL;
+
+-- ugyanez JOIN operator nelkul, csak WHERE-rel
+SELECT vezeteknev, keresztnev, k.cim, kk.leltari_szam
+    FROM KONYVTAR.tag t, KONYVTAR.kolcsonzes ko, KONYVTAR.konyvtari_konyv kk, KONYVTAR.konyv k
+    WHERE olvasojegyszam = tag_azon
+        AND ko.leltari_szam = kk.leltari_szam
+        AND kk.konyv_azon = k.konyv_azon
+        AND besorolas = 'diák' AND visszahozasi_datum IS NULL;
+    
+    
+-------------------------------------------------------------------------------------------------------   
+    
+    
+-- melyek azok a szerzo/olvaso parok, amelyek tagjai ugyanabban az evben szulettek, es melyik ez az ev?
+SELECT extract(year from t.szuletesi_datum),
+    sz.vezeteknev, sz.keresztnev, t.vezeteknev, t.keresztnev
+    FROM KONYVTAR.szerzo sz JOIN KONYVTAR.tag t
+        ON extract(year from sz.szuletesi_datum) =
+            extract(year from t.szuletesi_datum);
+
+-- kik azok az olvasok, akik idosebbek Frei Tamasnal (aki egy szerzo), es mikor szulettek?
+-- feltehetjuk, hogy csak egy ilyen nevu szerzo letezik
+-- rendezzuk az eredmenyt az olvasok eletkora szerint novekvo sorrendbe
+
+-- altalanos osszekapcsolassal
+SELECT t.vezeteknev || ' ' || t.keresztnev nev,
+    to_char(t.szuletesi_datum, 'DS')
+    FROM KONYVTAR.szerzo sz JOIN KONYVTAR.tag t
+        ON t.szuletesi_datum < sz.szuletesi_datum
+    WHERE sz.vezeteknev = 'Frei' AND sz.keresztnev = 'Tamás'
+    ORDER BY t.szuletesi_datum DESC;
+
+-- alkerdessel
+SELECT vezeteknev || ' ' || keresztnev nev,
+    to_char(szuletesi_datum, 'DS')
+    FROM KONYVTAR.tag
+    WHERE szuletesi_datum <
+        (SELECT szuletesi_datum
+            FROM KONYVTAR.szerzo
+            WHERE vezeteknev = 'Frei' AND keresztnev = 'Tamás')
+    ORDER BY szuletesi_datum DESC;
+
+-- alkerdessel es altalanos osszekapcsolassal
+SELECT t.vezeteknev || ' ' || t.keresztnev nev,
+    to_char(t.szuletesi_datum, 'DS')
+    FROM (SELECT * FROM KONYVTAR.szerzo
+            WHERE vezeteknev = 'Frei' AND keresztnev = 'Tamás') ft
+        JOIN KONYVTAR.tag t
+            ON t.szuletesi_datum < ft.szuletesi_datum
+    ORDER BY t.szuletesi_datum DESC;
+
+---------- Beagyazott SELECT-ek (alkerdesek) ----------
+
+-- 3 eset:
+-- 1. alak: FROM utan tablakent (lasd az elozo peldat)
+-- 2. alak: egy kifejezesben atomi ertekkent (lasd az elozo elotti peldat)
+-- 3. alak: kulonbozo operatorok (pl. IN) jobb oldali operandusaban listakent/tablakent (lasd a kovetkezo peldat)
+
+-- listazzuk ki azon konyvek cimet, kiadojat es arat, amelyeknek egyetlen peldanya sincs a konyvtarunkban
+-- (3. alak)
+SELECT cim, kiado, ar
+    FROM KONYVTAR.konyv
+    WHERE konyv_azon NOT IN
+        (SELECT konyv_azon
+            FROM KONYVTAR.konyvtari_konyv);
+
+-- ki a legidosebb olvaso, es mikor szuletett?
+-- vagy: kik a legidosebb olvasok, es mikor szulettek?
+-- vagy: ki(k) a legidosebb olvaso(k), es mikor szuletett/szulettek?
+-- (2. alak)
+SELECT vezeteknev, keresztnev, szuletesi_datum
+    FROM KONYVTAR.tag
+    WHERE szuletesi_datum =
+        (SELECT MIN(szuletesi_datum)
+            FROM KONYVTAR.tag);
+
+-- hany olyan konyv van, amely
+-- (1) 1990 es 2000 kozott kerult kiadasra, vagy
+-- (2) az ara 1000 es 3000 koze esik, vagy
+-- (3) sci-fi temaju es rovidebb 20 oldalnal?
+-- (1. alak)
+SELECT COUNT(*) FROM
+    (SELECT *
+        FROM KONYVTAR.konyv
+        WHERE ar BETWEEN 1000 AND 3000
+            OR tema = 'sci-fi' AND oldalszam < 20
+            OR to_char(kiadas_datuma, 'yyyy') BETWEEN 1990 AND 2000);
+
+-- ugyanez rovidebben, alkerdes nelkul:
+SELECT COUNT(*)
+    FROM KONYVTAR.konyv
+    WHERE ar BETWEEN 1000 AND 3000
+        OR tema = 'sci-fi' AND oldalszam < 20
+        OR to_char(kiadas_datuma, 'yyyy') BETWEEN 1990 AND 2000;
+
+-- listazzuk ki a krimi temaju konyvek peldanyainak adatait
+-- (3. alak)
+SELECT *
+    FROM KONYVTAR.konyvtari_konyv
+    WHERE konyv_azon IN
+        (SELECT konyv_azon
+            FROM KONYVTAR.konyv
+            WHERE tema = 'krimi');
+
+-- ugyanez osszekapcsolassal, alkerdes nelkul
+SELECT kk.*
+    FROM KONYVTAR.konyv k JOIN KONYVTAR.konyvtari_konyv kk
+        ON k.konyv_azon = kk.konyv_azon
+    WHERE tema = 'krimi';
+
+-- ugyanez termeszetes osszekapcsolassal
+SELECT leltari_szam, konyv_azon, ertek   -- ilyenkor nem lehet minositett oszlophivatkozast hasznalni
+    FROM KONYVTAR.konyv NATURAL JOIN KONYVTAR.konyvtari_konyv
+    WHERE tema = 'krimi';
+
+-- ugyanez masfele alkerdessel
+-- (3. alak EXISTS operatorral)
+SELECT *
+    FROM KONYVTAR.konyvtari_konyv kk
+    WHERE EXISTS    -- igaz, ha az alkerdes legalabb egy sort eredmenyez
+        (SELECT *   -- ez egy korrelalt alkerdes (az eddigiek mind fuggetlen alkerdesek voltak)
+            FROM KONYVTAR.konyv
+            WHERE konyv_azon = kk.konyv_azon AND tema = 'krimi');
+
+-- listazzuk ki azon konyvek cimet, kiadojat es arat, amelyeknek egyetlen peldanya sincs a konyvtarunkban
+-- (3. alak NOT EXISTS operatorral)
+SELECT cim, kiado, ar
+    FROM KONYVTAR.konyv k
+    WHERE NOT EXISTS
+        (SELECT *
+            FROM KONYVTAR.konyvtari_konyv
+            WHERE konyv_azon = k.konyv_azon);
+
+-- listazzuk ki azon konyvek cimet, kiadojat es arat, amelyeknek van legalabb egy olyan peldanya,
+-- ami tobbet er a konyv aranal (nem lesz ilyen konyv)
+-- (3. alak ANY operatorral)
+SELECT cim, kiado, ar
+    FROM konyvtar.konyv k
+    WHERE ar < ANY
+        (SELECT ertek
+            FROM KONYVTAR.konyvtari_konyv
+            WHERE konyv_azon = k.konyv_azon);
+
+-- ugyanez ANY nelkul, MAX operatorral (2. alak)
+SELECT cim, kiado, ar
+    FROM konyvtar.konyv k
+    WHERE ar <
+        (SELECT MAX(ertek)
+            FROM KONYVTAR.konyvtari_konyv
+            WHERE konyv_azon = k.konyv_azon);
+
+-- gyakorlo feladat:
+-- hany konyvet irtak az egyes szerzok? a szerzoket a nevukkel adjuk meg
+-- rendezzunk darabszam szerint csokkeno sorrendbe 
