@@ -1,0 +1,68 @@
+--1. feladat
+select distinct ugyfel_id, vezeteknev, keresztnev from s_ugyfel inner join s_megrendeles on ugyfel=ugyfel_id
+where indulasi_kikoto in
+(select kikoto_id from s_kikoto inner join s_helyseg on helyseg=helyseg_id
+where orszag = 'Olaszország')
+order by 1;
+
+--2. feladat
+select helyseg_id, orszag, helysegnev from s_kikoto inner join s_helyseg on helyseg=helyseg_id
+where helyseg in
+(select helyseg from s_ugyfel)
+order by 2, 3;
+
+--3. feladat
+select ut, count(kontener)from s_szallit inner join s_ut on ut_id = ut
+where indulasi_kikoto = 'It_Cat'
+group by ut
+order by 2 asc
+fetch first 4 rows with ties;
+
+--4. feladat
+create table s_kikoto_email(
+    kikoto_id varchar2(10) constraint ske_fk references s_kikoto(kikoto_id),
+    email varchar2(200),
+    constraint ske_pk primary key (kikoto_id,email)
+);
+
+--5. feladat
+alter table s_helyseg drop (lakossag);
+--6. feladat--35 rows deleted
+create table meg2 as select * from s_megrendeles;
+
+delete from meg2 where
+ugyfel in (
+    select ugyfel_id from s_ugyfel
+    where email is null and helyseg in(
+        select helyseg_id from s_helyseg
+        where orszag = 'Olaszország'
+    )
+);
+
+--7. feladat--4 rows updated
+update s_megrendeles set fizetett_osszeg = fizetett_osszeg * 1.15
+where ugyfel in (
+    select ugyfel_id from s_ugyfel inner join s_helyseg on helyseg_id = helyseg
+    where orszag = 'Franciaország'
+);
+
+--8. feladat
+--create view kiscica as
+select ht.hajo_tipus_id ,ht.nev, count(u.ut_id) from s_hajo_tipus ht 
+left join s_hajo h on ht.hajo_tipus_id = h.hajo_tipus
+left join s_ut u on h.hajo_id = u.hajo
+group by ht.hajo_tipus_id, ht.nev
+order by 2;
+--9. feladat
+--create view kilenc as
+select hajo, nev  from s_szallit 
+natural inner join s_hozzarendel 
+inner join s_ut on ut_id = ut 
+inner join s_hajo on hajo= hajo_id
+where to_char(indulasi_ido,'YYYY.MM')='2021.05'
+group by ut,nev,hajo
+order by sum(rakomanysuly) desc
+fetch first 1 rows with ties;
+
+--10. feladat
+grant insert (kikoto_id,helyseg) on s_kikoto to public
